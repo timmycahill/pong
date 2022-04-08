@@ -45,9 +45,17 @@ class Game():
             if event.type == pygame.QUIT:
                 self.isRunning = False
 
+
     def _updateGame(self):
-        # Move player paddle
+        # Update computer paddle direction
+        if self.paddleRightPos.y + (PADDLE_LENGTH / 2) < self.ballPos.y + (THICKNESS / 2):
+            self.computerDirection.y = PADDLE_SPEED
+        elif self.paddleRightPos.y + (PADDLE_LENGTH / 2) > self.ballPos.y + (THICKNESS / 2):
+            self.computerDirection.y = -PADDLE_SPEED
+
+        # Move paddles and ball
         self.paddleLeftPos.y += self.playerDirection.y
+        self.paddleRightPos.y += self.computerDirection.y
         self.ballPos.y += self.ballDirection.y
         self.ballPos.x += self.ballDirection.x
 
@@ -58,16 +66,32 @@ class Game():
             self.ballDirection.y *= -1
 
         # Bounce ball off paddles
+        lowerPaddle = False
+        paddleCollision = False
         if (self.ballPos.x <= self.paddleLeftPos.x + THICKNESS and self.ballPos.x >= self.paddleLeftPos.x and
             abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleLeftPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
             self.ballDirection.x < 0
-            or
-            self.ballPos.x >= self.paddleRightPos.x - THICKNESS and self.ballPos.x <= self.paddleRightPos.x and
+            ):
+            # Set collision to true and determine if the lower paddle was hit
+            paddleCollision = True
+            lowerPaddle = self.ballPos.y + (THICKNESS / 2) > self.paddleLeftPos.y + (PADDLE_LENGTH / 2)
+        elif (self.ballPos.x >= self.paddleRightPos.x - THICKNESS and self.ballPos.x <= self.paddleRightPos.x and
             abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleRightPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
             self.ballDirection.x > 0
             ):
+            # Set collision to true and determine if the lower paddle was hit
+            paddleCollision = True
+            lowerPaddle = self.ballPos.y + (THICKNESS / 2) > self.paddleRightPos.y + (PADDLE_LENGTH / 2)
+
+        if paddleCollision:
+            # Change ball direction
             self.ballDirection.x *= -1
 
+            # Modify ball y speed
+            if lowerPaddle:
+                self.ballDirection.y += 1
+            else:
+                self.ballDirection.y -= 1
 
         # Stop paddles when colliding with walls
         if self.paddleLeftPos.y < THICKNESS:
@@ -102,6 +126,7 @@ class Game():
 
         # Update screen
         pygame.display.flip()
+
 
     def run(self):
         # Game loop
