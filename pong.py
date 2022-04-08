@@ -6,8 +6,9 @@ FPS = 60
 THICKNESS = 15
 PADDLE_LENGTH = 100
 PADDLE_SPEED = 5
+BALL_SPEED = 5
 
-class Position():
+class Vector2():
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -20,30 +21,63 @@ class Game():
         pygame.display.set_caption("Pong")
 
         # Initialize variables
-        self.paddleLeftPos = Position(5, (WINDOW_HEIGHT - PADDLE_LENGTH) / 2)
-        self.playerDirection = 0
-        self.paddleRightPos = Position(WINDOW_WIDTH - THICKNESS - 5, (WINDOW_HEIGHT - PADDLE_LENGTH) / 2)
-        self.computerDirection = 0
+        self.paddleLeftPos = Vector2(5, (WINDOW_HEIGHT - PADDLE_LENGTH) / 2)
+        self.playerDirection = Vector2(0, 0)
+        self.paddleRightPos = Vector2(WINDOW_WIDTH - THICKNESS - 5, (WINDOW_HEIGHT - PADDLE_LENGTH) / 2)
+        self.computerDirection = Vector2(0, 0)
+        self.ballPos = Vector2((WINDOW_WIDTH - THICKNESS) / 2, (WINDOW_HEIGHT - THICKNESS) / 2)
+        self.ballDirection = Vector2(-BALL_SPEED, -BALL_SPEED)
 
 
     def _processInputs(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.playerDirection -= PADDLE_SPEED
+                    self.playerDirection.y -= PADDLE_SPEED
                 if event.key == pygame.K_DOWN:
-                    self.playerDirection += PADDLE_SPEED
+                    self.playerDirection.y += PADDLE_SPEED
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
-                    self.playerDirection += PADDLE_SPEED
+                    self.playerDirection.y += PADDLE_SPEED
                 if event.key == pygame.K_DOWN:
-                    self.playerDirection -= PADDLE_SPEED
+                    self.playerDirection.y -= PADDLE_SPEED
 
             if event.type == pygame.QUIT:
                 self.isRunning = False
 
     def _updateGame(self):
-        self.paddleLeftPos.y += self.playerDirection
+        # Move player paddle
+        self.paddleLeftPos.y += self.playerDirection.y
+        self.ballPos.y += self.ballDirection.y
+        self.ballPos.x += self.ballDirection.x
+
+        # Bounce ball off walls
+        if (self.ballPos.y <= THICKNESS and self.ballDirection.y < 0 or
+            self.ballPos.y >= WINDOW_HEIGHT - (THICKNESS * 2) and self.ballDirection.y > 0
+            ):
+            self.ballDirection.y *= -1
+
+        # Bounce ball off paddles
+        if (self.ballPos.x <= self.paddleLeftPos.x + THICKNESS and self.ballPos.x >= self.paddleLeftPos.x and
+            abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleLeftPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
+            self.ballDirection.x < 0
+            or
+            self.ballPos.x >= self.paddleRightPos.x - THICKNESS and self.ballPos.x <= self.paddleRightPos.x and
+            abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleRightPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
+            self.ballDirection.x > 0
+            ):
+            self.ballDirection.x *= -1
+
+
+        # Stop paddles when colliding with walls
+        if self.paddleLeftPos.y < THICKNESS:
+            self.paddleLeftPos.y = THICKNESS
+        if self.paddleLeftPos.y + PADDLE_LENGTH > WINDOW_HEIGHT - THICKNESS:
+            self.paddleLeftPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
+        if self.paddleRightPos.y < THICKNESS:
+            self.paddleRightPos.y = THICKNESS
+        if self.paddleRightPos.y + PADDLE_LENGTH > WINDOW_HEIGHT - THICKNESS:
+            self.paddleRightPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
 
 
     def _generateOutputs(self):
@@ -62,6 +96,9 @@ class Game():
         rightPaddle = pygame.Rect(self.paddleRightPos.x, self.paddleRightPos.y, THICKNESS, PADDLE_LENGTH)
         self.WINDOW.fill("white", rect=rightPaddle)
 
+        # Draw ball
+        ball = pygame.Rect(self.ballPos.x, self.ballPos.y, THICKNESS, THICKNESS)
+        self.WINDOW.fill("white", rect=ball)
 
         # Update screen
         pygame.display.flip()
