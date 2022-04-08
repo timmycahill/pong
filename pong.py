@@ -45,6 +45,16 @@ class Game():
     def _updateGame(self):
         self.paddleLeftPos.y += self.playerDirection
 
+        # Stop paddles when colliding with walls
+        if self.paddleLeftPos.y < THICKNESS:
+            self.paddleLeftPos.y = THICKNESS
+        if self.paddleLeftPos.y + PADDLE_LENGTH > WINDOW_HEIGHT - THICKNESS:
+            self.paddleLeftPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
+        if self.paddleRightPos.y < THICKNESS:
+            self.paddleRightPos.y = THICKNESS
+        if self.paddleRightPos.y + PADDLE_LENGTH > WINDOW_HEIGHT - THICKNESS:
+            self.paddleRightPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
+
 
     def _generateOutputs(self):
         # Clear screen
