@@ -45,11 +45,20 @@ class Game():
             if event.type == pygame.QUIT:
                 self.isRunning = False
 
+
     def _updateGame(self):
-        # Move player paddle
+        # Update computer paddle direction
+        if self.paddleRightPos.y + (PADDLE_LENGTH / 2) < self.ballPos.y + (THICKNESS / 2):
+            self.computerDirection.y = PADDLE_SPEED
+        elif self.paddleRightPos.y + (PADDLE_LENGTH / 2) > self.ballPos.y + (THICKNESS / 2):
+            self.computerDirection.y = -PADDLE_SPEED
+
+        # Move paddles and ball
         self.paddleLeftPos.y += self.playerDirection.y
+        self.paddleRightPos.y += self.computerDirection.y
         self.ballPos.y += self.ballDirection.y
         self.ballPos.x += self.ballDirection.x
+
 
         # Bounce ball off walls
         if (self.ballPos.y <= THICKNESS and self.ballDirection.y < 0 or
@@ -102,6 +111,7 @@ class Game():
 
         # Update screen
         pygame.display.flip()
+
 
     def run(self):
         # Game loop
