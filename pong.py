@@ -15,11 +15,6 @@ class Vector2():
 
 class Game():
     def __init__(self):
-        # Initialze window
-        pygame.init()
-        self.WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("Pong")
-
         # Initialize variables
         self.paddleLeftPos = Vector2(5, (WINDOW_HEIGHT - PADDLE_LENGTH) / 2)
         self.playerDirection = Vector2(0, 0)
@@ -27,6 +22,8 @@ class Game():
         self.computerDirection = Vector2(0, 0)
         self.ballPos = Vector2((WINDOW_WIDTH - THICKNESS) / 2, (WINDOW_HEIGHT - THICKNESS) / 2)
         self.ballDirection = Vector2(-BALL_SPEED, -BALL_SPEED)
+        self.player1Score = 0
+        self.player2Score = 0
 
 
     def _resetBall(self):
@@ -118,6 +115,12 @@ class Game():
         # Clear screen
         self.WINDOW.fill("black")
 
+        # Draw in scores
+        p1Score = self.font.render(str(self.player1Score), True, "white")
+        p2Score = self.font.render(str(self.player2Score), True, "white")
+        self.WINDOW.blit(p1Score, (WINDOW_WIDTH / 4 - p1Score.get_rect().width / 2, WINDOW_HEIGHT / 8))
+        self.WINDOW.blit(p2Score, (WINDOW_WIDTH / 4 * 3 - p1Score.get_rect().width / 2, WINDOW_HEIGHT / 8))
+
         # Draw environment
         topWall = pygame.Rect(0, 0, WINDOW_WIDTH, THICKNESS)
         self.WINDOW.fill("white", rect=topWall)
@@ -141,6 +144,12 @@ class Game():
 
 
     def run(self):
+        # Initialze window
+        pygame.init()
+        self.WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        pygame.display.set_caption("Pong")
+        self.font = pygame.font.SysFont("Keyboard", 150)
+
         # Game loop
         clock = pygame.time.Clock()
         self.isRunning = True
