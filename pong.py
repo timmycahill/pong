@@ -27,6 +27,9 @@ class Game():
         self.player2Score = 0
         self.gameOver = False
         self.playAgain = False
+        self.paddleCollision = False
+        self.scored = False
+        self.gameOverSoundPlayed = False
 
     def _resetGame(self):
         # Initialize variables
@@ -46,6 +49,7 @@ class Game():
         self.player2Score = 0
         self.gameOver = False
         self.playAgain = False
+        self.gameOverSoundPlayed = False
 
 
     def _resetBall(self):
@@ -101,23 +105,23 @@ class Game():
 
             # Bounce ball off paddles
             lowerPaddle = False
-            paddleCollision = False
+            self.paddleCollision = False
             if (self.ballPos.x <= self.paddleLeftPos.x + THICKNESS and self.ballPos.x >= self.paddleLeftPos.x and
                 abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleLeftPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
                 self.ballDirection.x < 0
                 ):
                 # Set collision to true and determine if the lower paddle was hit
-                paddleCollision = True
+                self.paddleCollision = True
                 lowerPaddle = self.ballPos.y + (THICKNESS / 2) > self.paddleLeftPos.y + (PADDLE_LENGTH / 2)
             elif (self.ballPos.x >= self.paddleRightPos.x - THICKNESS and self.ballPos.x <= self.paddleRightPos.x and
                 abs((self.ballPos.y + (THICKNESS / 2)) - (self.paddleRightPos.y + (PADDLE_LENGTH / 2))) < PADDLE_LENGTH / 2 and
                 self.ballDirection.x > 0
                 ):
                 # Set collision to true and determine if the lower paddle was hit
-                paddleCollision = True
+                self.paddleCollision = True
                 lowerPaddle = self.ballPos.y + (THICKNESS / 2) > self.paddleRightPos.y + (PADDLE_LENGTH / 2)
 
-            if paddleCollision:
+            if self.paddleCollision:
                 # Change ball direction
                 self.ballDirection.x *= -1
 
@@ -139,9 +143,11 @@ class Game():
 
             # Reset ball on score
             if self.ballPos.x < 0:
+                self.scored = True
                 self.player2Score += 1
                 self._resetBall()
             elif self.ballPos.x > WINDOW_WIDTH - THICKNESS:
+                self.scored = True
                 self.player1Score += 1
                 self._resetBall()
 
@@ -170,6 +176,9 @@ class Game():
 
         # Display winner
         if self.gameOver:
+            if not self.gameOverSoundPlayed:
+                self.gameOverSound.play()
+                self.gameOverSoundPlayed = True
             winner = "Player 1" if self.player1Score >= 11 else "Player 2"
             winnerFont = pygame.font.SysFont(FONTS, 80)
             winnerMessage = winnerFont.render("{} Wins".format(winner), True, "white", "black")
@@ -188,6 +197,14 @@ class Game():
             ball = pygame.Rect(self.ballPos.x, self.ballPos.y, THICKNESS, THICKNESS)
             self.WINDOW.fill("white", rect=ball)
 
+            # Play sounds
+            if self.paddleCollision:
+                self.hitSound.play()
+                self.paddleCollision = False
+            if self.scored:
+                self.scoreSound.play()
+                self.scored = False
+
         # Update screen
         pygame.display.flip()
 
@@ -198,6 +215,9 @@ class Game():
         self.WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Pong")
         self.font = pygame.font.SysFont(FONTS, 150)
+        self.hitSound = pygame.mixer.Sound("assets/sounds/hit.wav")
+        self.scoreSound = pygame.mixer.Sound("assets/sounds/score.wav")
+        self.gameOverSound = pygame.mixer.Sound("assets/sounds/gameOver.wav")
 
         # Game loop
         clock = pygame.time.Clock()
