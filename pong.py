@@ -29,6 +29,12 @@ class Game():
         self.ballDirection = Vector2(-BALL_SPEED, -BALL_SPEED)
 
 
+    def _resetBall(self):
+        self.ballPos.x = (WINDOW_WIDTH - THICKNESS) / 2
+        self.ballPos.y = (WINDOW_HEIGHT - THICKNESS) / 2
+        self.ballDirection.x = -BALL_SPEED
+        self.ballDirection.y = -BALL_SPEED
+
     def _processInputs(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -102,6 +108,10 @@ class Game():
             self.paddleRightPos.y = THICKNESS
         if self.paddleRightPos.y + PADDLE_LENGTH > WINDOW_HEIGHT - THICKNESS:
             self.paddleRightPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
+
+        # Reset ball on score
+        if self.ballPos.x < 0 or self.ballPos.x > WINDOW_WIDTH - THICKNESS:
+            self._resetBall()
 
 
     def _generateOutputs(self):
