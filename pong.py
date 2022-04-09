@@ -107,7 +107,11 @@ class Game():
             self.paddleRightPos.y = WINDOW_HEIGHT - THICKNESS - PADDLE_LENGTH
 
         # Reset ball on score
-        if self.ballPos.x < 0 or self.ballPos.x > WINDOW_WIDTH - THICKNESS:
+        if self.ballPos.x < 0:
+            self.player2Score += 1
+            self._resetBall()
+        elif self.ballPos.x > WINDOW_WIDTH - THICKNESS:
+            self.player1Score += 1
             self._resetBall()
 
 
