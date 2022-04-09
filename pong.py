@@ -7,6 +7,7 @@ THICKNESS = 15
 PADDLE_LENGTH = 100
 PADDLE_SPEED = 5
 BALL_SPEED = 5
+FONTS = []
 
 class Vector2():
     def __init__(self, x, y):
@@ -25,6 +26,26 @@ class Game():
         self.player1Score = 0
         self.player2Score = 0
         self.gameOver = False
+        self.playAgain = False
+
+    def _resetGame(self):
+        # Initialize variables
+        self.paddleLeftPos.x = 5
+        self.paddleLeftPos.y = (WINDOW_HEIGHT - PADDLE_LENGTH) / 2
+        self.playerDirection.x = 0
+        self.playerDirection.y = 0
+        self.paddleRightPos.x = WINDOW_WIDTH - THICKNESS - 5
+        self.paddleRightPos.y = (WINDOW_HEIGHT - PADDLE_LENGTH) / 2
+        self.computerDirection.x = 0
+        self.computerDirection.y = 0
+        self.ballPos.x = (WINDOW_WIDTH - THICKNESS) / 2
+        self.ballPos.y = (WINDOW_HEIGHT - THICKNESS) / 2
+        self.ballDirection.x = -BALL_SPEED
+        self.ballDirection.y = -BALL_SPEED
+        self.player1Score = 0
+        self.player2Score = 0
+        self.gameOver = False
+        self.playAgain = False
 
 
     def _resetBall(self):
@@ -40,6 +61,11 @@ class Game():
                     self.playerDirection.y -= PADDLE_SPEED
                 if event.key == pygame.K_DOWN:
                     self.playerDirection.y += PADDLE_SPEED
+                if self.gameOver:
+                    if event.key == pygame.K_y:
+                        self.playAgain = True
+                    elif event.key == pygame.K_n:
+                        self.isRunning = False
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
                     self.playerDirection.y += PADDLE_SPEED
@@ -52,7 +78,8 @@ class Game():
 
     def _updateGame(self):
         if self.gameOver:
-            pass
+            if self.playAgain:
+                self._resetGame()
         else:
             # Update computer paddle direction
             if self.paddleRightPos.y + (PADDLE_LENGTH / 2) < self.ballPos.y + (THICKNESS / 2):
@@ -144,9 +171,12 @@ class Game():
         # Display winner
         if self.gameOver:
             winner = "Player 1" if self.player1Score >= 11 else "Player 2"
-            winnerFont = pygame.font.SysFont("Keyboard", 80)
+            winnerFont = pygame.font.SysFont(FONTS, 80)
             winnerMessage = winnerFont.render("{} Wins".format(winner), True, "white", "black")
             self.WINDOW.blit(winnerMessage, ((WINDOW_WIDTH - winnerMessage.get_rect().width) / 2, (WINDOW_HEIGHT - winnerMessage.get_rect().height) / 2))
+            playAgainFont = pygame.font.SysFont(FONTS, 50)
+            playAgainMessage = playAgainFont.render("Play again? (Y / N)", True, "white", "black")
+            self.WINDOW.blit(playAgainMessage, ((WINDOW_WIDTH - playAgainMessage.get_rect().width) / 2, (WINDOW_HEIGHT + winnerMessage.get_rect().height) / 2))
         else:
             # Draw paddles
             leftPaddle = pygame.Rect(self.paddleLeftPos.x, self.paddleLeftPos.y, THICKNESS, PADDLE_LENGTH)
@@ -167,7 +197,7 @@ class Game():
         pygame.init()
         self.WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Pong")
-        self.font = pygame.font.SysFont("Keyboard", 150)
+        self.font = pygame.font.SysFont(FONTS, 150)
 
         # Game loop
         clock = pygame.time.Clock()
