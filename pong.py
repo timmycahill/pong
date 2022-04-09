@@ -108,11 +108,13 @@ class Game():
         # Clear screen
         self.WINDOW.fill("black")
 
-        # Draw walls
+        # Draw environment
         topWall = pygame.Rect(0, 0, WINDOW_WIDTH, THICKNESS)
         self.WINDOW.fill("white", rect=topWall)
         bottomWall = pygame.Rect(0, WINDOW_HEIGHT - THICKNESS, WINDOW_WIDTH, THICKNESS)
         self.WINDOW.fill("white", rect=bottomWall)
+        midfield = pygame.Rect(WINDOW_WIDTH / 2 - 1, 0, 2, WINDOW_HEIGHT)
+        self.WINDOW.fill("white", rect=midfield)
 
         # Draw paddles
         leftPaddle = pygame.Rect(self.paddleLeftPos.x, self.paddleLeftPos.y, THICKNESS, PADDLE_LENGTH)
